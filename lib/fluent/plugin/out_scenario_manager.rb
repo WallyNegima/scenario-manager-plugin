@@ -19,9 +19,18 @@ module Fluent
   module Plugin
     class ScenarioManagerOutput < Fluent::Plugin::Output
       Fluent::Plugin.register_output("scenario_manager", self)
-      helpers :storage
-
+      helpers :storage, :event_emitter
       DEFAULT_STORAGE_TYPE = 'local'
+      PATTERN_MAX_NUM = 20
+
+      config_param :scenario_manage_mode, :bool, default: true,
+        desc: 'false: update storage and emit record only.'
+      config_param :if, :string, default: nil,
+        desc: 'first scenario manage rule.'
+      (2..PATTERN_MAX_NUM).each do |i|
+        config_param ('elsif' + i.to_s).to_sym, :string, default: nil,
+          desc: 'Specify tag(not necessary)'
+      end
 
       def configure(conf)
         super
@@ -44,6 +53,7 @@ module Fluent
           @storage.put(:scenario, record["id"])
         end
       end
+
     end
   end
 end
