@@ -27,7 +27,7 @@ module Fluent
         desc: 'false: update storage and emit record only.'
       config_param :if, :string, default: nil,
         desc: 'first scenario manage rule.'
-      (2..PATTERN_MAX_NUM).each do |i|
+      (1..PATTERN_MAX_NUM).each do |i|
         config_param ('elsif' + i.to_s).to_sym, :string, default: nil,
           desc: 'Specify tag(not necessary)'
       end
@@ -51,6 +51,8 @@ module Fluent
           pp time
           pp record
           @storage.put(:scenario, record["id"])
+          # ただオウムがえし
+          router.emit('scenaroi', time, record)
         end
       end
 
