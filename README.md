@@ -1,0 +1,1 @@
+# scunario-manager-plugin
