@@ -7,7 +7,9 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
   end
 
   test "failure" do
-    flunk
+  end
+
+  test "SCCESS" do
   end
 
   private
