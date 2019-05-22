@@ -1,0 +1,6 @@
+Style/AsciiComments:
+  Enabled: false
+Metrics/LineLength:
+  Max: 100
+Naming/UncommunicativeMethodParamName:
+  Enabled: false

@@ -19,6 +19,7 @@ require 'fluent/plugin/output'
 
 module Fluent
   module Plugin
+    # fluentd output plugin
     class ScenarioManagerOutput < Fluent::Plugin::Output
       Fluent::Plugin.register_output('scenario_manager', self)
       helpers :storage, :event_emitter
