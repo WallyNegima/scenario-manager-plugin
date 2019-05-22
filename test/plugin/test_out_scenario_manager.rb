@@ -1,5 +1,7 @@
-require "helper"
-require "fluent/plugin/out_scenario_manager.rb"
+# frozen_string_literal: true
+
+require 'helper'
+require 'fluent/plugin/out_scenario_manager.rb'
 # Load the module that defines helper methods for testing (Required)
 require 'fluent/test/helpers'
 # Load the test driver (Required)
@@ -17,7 +19,7 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
   # configuration related test group
   sub_test_case 'configuration' do
     test 'empty configuration' do
-      conf = config_element()
+      conf = config_element
       d = create_driver(conf)
       assert_equal nil, d.instance.if
       assert_equal nil, d.instance.elsif1
@@ -30,17 +32,15 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
   sub_test_case 'scenario manage' do
     test 'normal' do
       conf = config_element('ROOT', 'test', {
-        'if' => 'record[face_id] == 1'
-      }, [config_element('scenario1', '', {
-        'label' => 'greeting',
-        'priority' => 2,
-        'limit' => 30,
-        'action' => 'greet',
-      }
-     )])
+                              'if' => 'record[face_id] == 1'
+                            }, [config_element('scenario1', '',
+                                               'label' => 'greeting',
+                                               'priority' => 2,
+                                               'limit' => 30,
+                                               'action' => 'greet')])
       d = create_driver(conf)
       d.run(default_tag: 'test') do
-        d.feed({'face_id' => 1})
+        d.feed('face_id' => 1)
       end
 
       events = d.events
