@@ -19,6 +19,31 @@ module Fluent
   module Plugin
     class ScenarioManagerOutput < Fluent::Plugin::Output
       Fluent::Plugin.register_output("scenario_manager", self)
+      helpers :storage
+
+      DEFAULT_STORAGE_TYPE = 'local'
+
+      def configure(conf)
+        super
+        config = conf.elements.select{|e| e.name == 'storage' }.first
+        @storage = storage_create(usage: 'test', conf: config, default_type: DEFAULT_STORAGE_TYPE)
+      end
+
+      def start
+        super
+        @storage.put(:scenario, 0) unless @storage.get(:scenario)
+        pp @storage.get(:scenario)
+      end
+
+      def process(tag, es)
+        pp @storage.get(:scenario)
+        es.each do |time, record|
+          # output events to ...
+          pp time
+          pp record
+          @storage.put(:scenario, record["id"])
+        end
+      end
     end
   end
 end
