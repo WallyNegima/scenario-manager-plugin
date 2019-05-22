@@ -1,6 +1,14 @@
 Style/AsciiComments:
   Enabled: false
 Metrics/LineLength:
-  Max: 100
+  Max: 130
 Naming/UncommunicativeMethodParamName:
   Enabled: false
+Metrics/AbcSize:
+  Max: 25
+Metrics/MethodLength:
+  Max: 30
+Metrics/PerceivedComplexity:
+  Max: 10
+Metrics/CyclomaticComplexity:
+  Max: 10

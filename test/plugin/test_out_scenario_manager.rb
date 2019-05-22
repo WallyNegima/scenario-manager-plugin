@@ -19,9 +19,17 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
   # configuration related test group
   sub_test_case 'configuration' do
     test 'empty configuration' do
-      conf = config_element
+      conf = config_element('ROOT', '', {
+                              'if' => 'record[face_id] == 1',
+                              'tag' => 'scenario'
+                            }, [config_element('scenario1', '',
+                                               'label' => 'greeting',
+                                               'priority' => 2,
+                                               'limit' => 30,
+                                               'action' => 'greet')])
       d = create_driver(conf)
-      assert_equal nil, d.instance.if
+      assert_equal 'record[face_id] == 1', d.instance.if
+      assert_equal 'scenario', d.instance.tag
       assert_equal nil, d.instance.elsif1
       assert_equal nil, d.instance.elsif2
       assert_equal true, d.instance.scenario_manage_mode
@@ -31,8 +39,9 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
   # Another test group goes here
   sub_test_case 'scenario manage' do
     test 'normal' do
-      conf = config_element('ROOT', 'test', {
-                              'if' => 'record[face_id] == 1'
+      conf = config_element('ROOT', '', {
+                              'if' => 'record[face_id] == 1',
+                              'tag' => 'scenario'
                             }, [config_element('scenario1', '',
                                                'label' => 'greeting',
                                                'priority' => 2,

@@ -26,19 +26,48 @@ module Fluent
       DEFAULT_STORAGE_TYPE = 'local'
       PATTERN_MAX_NUM = 20
 
-      config_param :scenario_manage_mode, :bool, default: true,
-                                                 desc: 'false: update storage and emit record only.'
-      config_param :if, :string, default: nil,
-                                 desc: 'first scenario manage rule.'
+      config_param(
+        :scenario_manage_mode,
+        :bool,
+        default: true,
+        desc: 'false: update storage and emit record only.'
+      )
+
+      config_param(
+        :tag,
+        :string,
+        default: 'scenario'
+      )
+      config_param(
+        :if, :string, default: nil, desc: 'first scenario manage rule.'
+      )
       (1..PATTERN_MAX_NUM).each do |i|
-        config_param ('elsif' + i.to_s).to_sym, :string, default: nil,
-                                                         desc: 'Specify tag(not necessary)'
+        config_param(
+          ('elsif' + i.to_s).to_sym,
+          :string,
+          default: nil,
+          desc: 'Specify tag(not necessary)'
+        )
+      end
+
+      (1..PATTERN_MAX_NUM).each do |i|
+        config_param(
+          "scenario#{i}".to_sym,
+          :string,
+          default: nil,
+          desc: 'Scenario defines'
+        )
       end
 
       def configure(conf)
         super
         config = conf.elements.select { |e| e.name == 'storage' }.first
         @storage = storage_create(usage: 'test', conf: config, default_type: DEFAULT_STORAGE_TYPE)
+
+        # えらーならraiseする
+        valid_conf?(conf)
+
+        # TODO: scenarioを配列に入れる処理かく
       end
 
       def start
@@ -51,12 +80,36 @@ module Fluent
         pp @storage.get(:scenario)
         es.each do |time, record|
           # output events to ...
+          # TODO: smmがfalseのときに受け流すだけの処理をかく
           pp time
           pp record
           @storage.put(:scenario, record['id'])
           # ただオウムがえし
           router.emit('scenaroi', time, record)
         end
+      end
+
+      private
+
+      BUILTIN_CONFIGURATIONS = %w[@id @type @label scenario_manage_mode tag if].freeze
+      def valid_conf?(conf)
+        # ここで、BUILTIN_CONFIGURATIONS に入っていないものがあった場合はerrorをraise
+        elsif_cnt = 0
+        # scenario_cnt = 0
+        conf.each_pair do |k, v|
+          elsif_cnt += 1 if k.match(/^elsif\d\d?$/)
+          next if BUILTIN_CONFIGURATIONS.include?(k) || k.match(/^elsif\d\d?$/)
+
+          raise(Fluent::ConfigError, 'out_scenario_manager: some weird config is set {' + k.to_s + ':' + v.to_s + '}')
+        end
+
+        # manage_modeじゃなかったら何もチェックしない
+        return true unless @scenario_manage_mode
+
+        raise Fluent::ConfigError, 'out_scenario_manager: "if" directive is ruquired' if @if.nil?
+
+        # TODO: scenarioレコードが一個もないときのvalidation追加する
+        # raise Fluent::ConfigError, 'out_scenario_manager: "scenario" define is ruquired at least 1' if scenario_cnt <= 0
       end
     end
   end
