@@ -67,25 +67,37 @@ module Fluent
         # えらーならraiseする
         valid_conf?(conf)
 
-        # TODO: scenarioを配列に入れる処理かく
+        # シナリオパラメーターを取得
+        @scenarios = []
+        conf.elements.select do |element|
+          element.name.match(/^scenario\d\d?$/)
+        end.each do |param|
+          scenario = {}
+          param.each_pair do |key, value|
+            scenario.merge!(key => value)
+          end
+          @scenarios.push(scenario)
+        end
       end
 
       def start
         super
         @storage.put(:scenario, 0) unless @storage.get(:scenario)
         pp @storage.get(:scenario)
+        pp @scenarios
       end
 
-      def process(_tag, es)
+      def process(tag, es)
         pp @storage.get(:scenario)
         es.each do |time, record|
           # output events to ...
-          # TODO: smmがfalseのときに受け流すだけの処理をかく
-          pp time
-          pp record
-          @storage.put(:scenario, record['id'])
+          unless @scenario_manage_mode
+            @storage.put(:scenario, record['scenario_id'])
+            router.emit(tag, time, record) && return
+          end
+
           # ただオウムがえし
-          router.emit('scenaroi', time, record)
+          router.emit('scenario', time, record)
         end
       end
 
@@ -110,6 +122,22 @@ module Fluent
 
         # TODO: scenarioレコードが一個もないときのvalidation追加する
         # raise Fluent::ConfigError, 'out_scenario_manager: "scenario" define is ruquired at least 1' if scenario_cnt <= 0
+      end
+    end
+
+    def convert_num(value)
+      # Booleanがチェック
+      if value == 'true'
+        return true
+      elsif value == 'false'
+        return false
+      end
+
+      # 数値データなら数値で返す
+      if value.to_i.to_s == value.to_s
+        return value.to_i
+      else
+        return value
       end
     end
   end
