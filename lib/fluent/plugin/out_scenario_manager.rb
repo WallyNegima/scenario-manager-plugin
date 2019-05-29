@@ -18,6 +18,7 @@
 require 'fluent/plugin/output'
 
 module Fluent
+  # plugin
   module Plugin
     # fluentd output plugin
     class ScenarioManagerOutput < Fluent::Plugin::Output
@@ -64,20 +65,19 @@ module Fluent
         config = conf.elements.select { |e| e.name == 'storage' }.first
         @storage = storage_create(usage: 'test', conf: config, default_type: DEFAULT_STORAGE_TYPE)
 
-        # えらーならraiseする
-        valid_conf?(conf)
-
         # シナリオパラメーターを取得
         @scenarios = []
-        conf.elements.select do |element|
-          element.name.match(/^scenario\d\d?$/)
-        end.each do |param|
+        conf.elements.select { |element| element.name.match(/^scenario\d\d?$/) }
+            .each do |param|
           scenario = {}
           param.each_pair do |key, value|
             scenario.merge!(key => value)
           end
           @scenarios.push(scenario)
         end
+
+        # えらーならraiseする
+        valid_conf?(conf)
       end
 
       def start
@@ -93,7 +93,7 @@ module Fluent
           # output events to ...
           unless @scenario_manage_mode
             @storage.put(:scenario, record['scenario_id'])
-            router.emit(tag, time, record) && return
+            router.emit(tag, time, record)
           end
 
           # ただオウムがえし
@@ -105,9 +105,11 @@ module Fluent
 
       BUILTIN_CONFIGURATIONS = %w[@id @type @label scenario_manage_mode tag if].freeze
       def valid_conf?(conf)
+        # manage_modeじゃなかったら何もチェックしない
+        return true unless @scenario_manage_mode
+
         # ここで、BUILTIN_CONFIGURATIONS に入っていないものがあった場合はerrorをraise
         elsif_cnt = 0
-        # scenario_cnt = 0
         conf.each_pair do |k, v|
           elsif_cnt += 1 if k.match(/^elsif\d\d?$/)
           next if BUILTIN_CONFIGURATIONS.include?(k) || k.match(/^elsif\d\d?$/)
@@ -115,13 +117,8 @@ module Fluent
           raise(Fluent::ConfigError, 'out_scenario_manager: some weird config is set {' + k.to_s + ':' + v.to_s + '}')
         end
 
-        # manage_modeじゃなかったら何もチェックしない
-        return true unless @scenario_manage_mode
-
         raise Fluent::ConfigError, 'out_scenario_manager: "if" directive is ruquired' if @if.nil?
-
-        # TODO: scenarioレコードが一個もないときのvalidation追加する
-        # raise Fluent::ConfigError, 'out_scenario_manager: "scenario" define is ruquired at least 1' if scenario_cnt <= 0
+        raise Fluent::ConfigError, 'out_scenario_manager: "scenario" define is ruquired at least 1' if @scenarios.size <= 0
       end
     end
 

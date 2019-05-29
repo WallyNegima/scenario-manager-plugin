@@ -34,6 +34,14 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
       assert_equal nil, d.instance.elsif2
       assert_equal true, d.instance.scenario_manage_mode
     end
+
+    test 'not scenario manage mode configuration' do
+      conf = config_element('ROOT', '', {
+                              'scenario_manage_mode' => false
+                            })
+      d = create_driver(conf)
+      assert_equal false, d.instance.scenario_manage_mode
+    end
   end
 
   # Another test group goes here
