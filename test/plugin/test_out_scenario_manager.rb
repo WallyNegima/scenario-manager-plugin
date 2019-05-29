@@ -36,9 +36,8 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
     end
 
     test 'not scenario manage mode configuration' do
-      conf = config_element('ROOT', '', {
-                              'scenario_manage_mode' => false
-                            })
+      conf = config_element('ROOT', '',
+                            'scenario_manage_mode' => false)
       d = create_driver(conf)
       assert_equal false, d.instance.scenario_manage_mode
     end
@@ -58,6 +57,18 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
       d = create_driver(conf)
       d.run(default_tag: 'test') do
         d.feed('face_id' => 1)
+      end
+
+      events = d.events
+      assert_equal(1, events.size)
+    end
+
+    test 'not scenario manage mode' do
+      conf = config_element('ROOT', '',
+                            'scenario_manage_mode' => false)
+      d = create_driver(conf)
+      d.run(default_tag: 'test') do
+        d.feed('face_id' => 1, 'scenario_id' => 1)
       end
 
       events = d.events

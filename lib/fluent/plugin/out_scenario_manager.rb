@@ -78,6 +78,15 @@ module Fluent
 
         # えらーならraiseする
         valid_conf?(conf)
+
+        # シナリオルールの取得
+        @rules = []
+        @rules.push(conf['if'])
+        (1..PATTERN_MAX_NUM).each do |i|
+          next unless conf["elsif#{i}"]
+
+          @rules.push(conf["elsif#{i}"])
+        end
       end
 
       def start
@@ -85,6 +94,7 @@ module Fluent
         @storage.put(:scenario, 0) unless @storage.get(:scenario)
         pp @storage.get(:scenario)
         pp @scenarios
+        pp @rules
       end
 
       def process(tag, es)
@@ -94,6 +104,7 @@ module Fluent
           unless @scenario_manage_mode
             @storage.put(:scenario, record['scenario_id'])
             router.emit(tag, time, record)
+            break
           end
 
           # ただオウムがえし
