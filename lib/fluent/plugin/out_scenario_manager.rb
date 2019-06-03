@@ -115,6 +115,9 @@ module Fluent
           end
 
           # scenario check
+          execute_idx = scenario_ditector(record)
+
+          next if execute_idx.nil?
 
           # execute scenario
           # マッチしたシナリオを実行する（emitする）
@@ -142,10 +145,13 @@ module Fluent
         raise Fluent::ConfigError, 'out_scenario_manager: "scenario" define is ruquired at least 1' if @scenarios.size <= 0
       end
 
+      # ruleを調べて、マッチしたらそのindexを返す。
+      # すべてマッチしなかったらnilを返す
       def scenario_ditector(record) # rubocop:disable all
         @rules.each_with_index do |rule, idx|
           return idx if instance_eval(rule)
         end
+        nil
       end
 
       def separate_rule_and_exec(rule)

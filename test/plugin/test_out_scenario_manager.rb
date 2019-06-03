@@ -20,7 +20,7 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
   sub_test_case 'configuration' do
     test 'empty configuration' do
       conf = config_element('ROOT', '', {
-                              'if' => 'record[face_id] == 1 then executeScenario singing',
+                              'if' => 'record["face_id"] == 1 then executeScenario singing',
                               'tag' => 'scenario'
                             }, [config_element('scenario1', '',
                                                'label' => 'greeting',
@@ -28,7 +28,7 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
                                                'limit' => 30,
                                                'action' => 'greet')])
       d = create_driver(conf)
-      assert_equal 'record[face_id] == 1 then executeScenario singing', d.instance.if
+      assert_equal 'record["face_id"] == 1 then executeScenario singing', d.instance.if
       assert_equal 'scenario', d.instance.tag
       assert_equal nil, d.instance.elsif1
       assert_equal nil, d.instance.elsif2
@@ -44,7 +44,7 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
 
     test 'error configuration' do
       conf = config_element('ROOT', '', {
-                              'if' => 'record[face_id] == 1',
+                              'if' => 'record["face_id"] == 1',
                               'tag' => 'scenario'
                             }, [config_element('scenario1', '',
                                                'label' => 'greeting',
@@ -62,7 +62,7 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
   sub_test_case 'scenario manage' do
     test 'normal' do
       conf = config_element('ROOT', '', {
-                              'if' => 'record[face_id] == 1 then executeScenario greeting',
+                              'if' => 'record["face_id"] == 1 then executeScenario greeting',
                               'tag' => 'scenario'
                             }, [config_element('scenario1', '',
                                                'label' => 'greeting',
@@ -77,8 +77,11 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
       events = d.events
       assert_equal(1, events.size)
     end
+  end
 
-    test 'not scenario manage mode' do
+  # Another test group goes here
+  sub_test_case 'not scenario manage mode' do
+    test 'normal' do
       conf = config_element('ROOT', '',
                             'scenario_manage_mode' => false)
       d = create_driver(conf)
