@@ -5,7 +5,7 @@ Metrics/LineLength:
 Naming/UncommunicativeMethodParamName:
   Enabled: false
 Metrics/AbcSize:
-  Max: 25
+  Max: 30
 Metrics/MethodLength:
   Max: 30
 Metrics/PerceivedComplexity:
@@ -13,4 +13,6 @@ Metrics/PerceivedComplexity:
 Metrics/CyclomaticComplexity:
   Max: 10
 Metrics/BlockLength:
-  Max: 30
+  Max: 40
+Metrics/ClassLength:
+  Max: 120

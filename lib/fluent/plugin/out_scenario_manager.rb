@@ -142,8 +142,9 @@ module Fluent
         raise Fluent::ConfigError, 'out_scenario_manager: "scenario" define is ruquired at least 1' if @scenarios.size <= 0
       end
 
-      def scenario_ditector(_record)
+      def scenario_ditector(record) # rubocop:disable all
         @rules.each_with_index do |rule, idx|
+          return idx if instance_eval(rule)
         end
       end
 
@@ -156,18 +157,14 @@ module Fluent
 
       def convert_num(value)
         # Booleanがチェック
-        if value == 'true'
-          return true
-        elsif value == 'false'
-          return false
-        end
+        return true if value == 'true'
+
+        return false if value == 'false'
 
         # 数値データなら数値で返す
-        if value.to_i.to_s == value.to_s
-          return value.to_i
-        else
-          return value
-        end
+        return value.to_i if value.to_i.to_s == value.to_s
+
+        value
       end
     end
   end

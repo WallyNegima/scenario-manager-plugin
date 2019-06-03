@@ -53,7 +53,7 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
                                                'action' => 'greet')])
 
       assert_raise(Fluent::ConfigError) do
-        d = create_driver(conf)
+        create_driver(conf)
       end
     end
   end
