@@ -79,13 +79,20 @@ module Fluent
         # えらーならraiseする
         valid_conf?(conf)
 
+        return unless @scenario_manage_mode
+
         # シナリオルールの取得
         @rules = []
-        @rules.push(conf['if'])
+        @executes = []
+        rule, execute = separate_rule_and_exec(conf['if'])
+        @rules.push(rule)
+        @executes.push(execute)
         (1..PATTERN_MAX_NUM).each do |i|
           next unless conf["elsif#{i}"]
 
-          @rules.push(conf["elsif#{i}"])
+          rule, execute = separate_rule_and_exec(conf["elsif#{i}"])
+          @rules.push(rule)
+          @executes.push(execute)
         end
       end
 
@@ -107,7 +114,10 @@ module Fluent
             break
           end
 
-          # ただオウムがえし
+          # scenario check
+
+          # execute scenario
+          # マッチしたシナリオを実行する（emitする）
           router.emit('scenario', time, record)
         end
       end
@@ -131,21 +141,33 @@ module Fluent
         raise Fluent::ConfigError, 'out_scenario_manager: "if" directive is ruquired' if @if.nil?
         raise Fluent::ConfigError, 'out_scenario_manager: "scenario" define is ruquired at least 1' if @scenarios.size <= 0
       end
-    end
 
-    def convert_num(value)
-      # Booleanがチェック
-      if value == 'true'
-        return true
-      elsif value == 'false'
-        return false
+      def scenario_ditector(_record)
+        @rules.each_with_index do |rule, idx|
+        end
       end
 
-      # 数値データなら数値で返す
-      if value.to_i.to_s == value.to_s
-        return value.to_i
-      else
-        return value
+      def separate_rule_and_exec(rule)
+        separated_str = /(.+*)( then )(.+*)/.match(rule)
+        [separated_str[1], separated_str[3]]
+      rescue StandardError
+        raise Fluent::ConfigError, 'out_scenario_manager: scenario rule should contain ~ then ~ .'
+      end
+
+      def convert_num(value)
+        # Booleanがチェック
+        if value == 'true'
+          return true
+        elsif value == 'false'
+          return false
+        end
+
+        # 数値データなら数値で返す
+        if value.to_i.to_s == value.to_s
+          return value.to_i
+        else
+          return value
+        end
       end
     end
   end
