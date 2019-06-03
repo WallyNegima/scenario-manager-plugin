@@ -20,7 +20,7 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
   sub_test_case 'configuration' do
     test 'empty configuration' do
       conf = config_element('ROOT', '', {
-                              'if' => 'record["face_id"] == 1 then executeScenario singing',
+                              'if' => 'record["face_id"] == 1 then execute_scenario singing',
                               'tag' => 'scenario'
                             }, [config_element('scenario1', '',
                                                'label' => 'greeting',
@@ -28,7 +28,7 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
                                                'limit' => 30,
                                                'action' => 'greet')])
       d = create_driver(conf)
-      assert_equal 'record["face_id"] == 1 then executeScenario singing', d.instance.if
+      assert_equal 'record["face_id"] == 1 then execute_scenario singing', d.instance.if
       assert_equal 'scenario', d.instance.tag
       assert_equal nil, d.instance.elsif1
       assert_equal nil, d.instance.elsif2
@@ -62,7 +62,7 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
   sub_test_case 'scenario manage' do
     test 'normal' do
       conf = config_element('ROOT', '', {
-                              'if' => 'record["face_id"] == 1 then executeScenario greeting',
+                              'if' => 'record["face_id"] == 1 then execute_scenario greeting',
                               'tag' => 'scenario'
                             }, [config_element('scenario1', '',
                                                'label' => 'greeting',
@@ -76,6 +76,11 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
 
       events = d.events
       assert_equal(1, events.size)
+      record = events.first[2]
+      assert_equal(record['label'], 'greeting')
+      assert_equal(record['priority'], 2)
+      assert_equal(record['limit'], 30)
+      assert_equal(record['action'], 'greet')
     end
   end
 

@@ -98,7 +98,7 @@ module Fluent
 
       def start
         super
-        @storage.put(:scenario, 0) unless @storage.get(:scenario)
+        @storage.put(:scenario, '') unless @storage.get(:scenario)
         pp @storage.get(:scenario)
       end
 
@@ -107,19 +107,19 @@ module Fluent
         es.each do |time, record|
           # output events to ...
           unless @scenario_manage_mode
-            @storage.put(:scenario, record['scenario_id'])
+            @storage.put(:scenario, record['label'] || '')
             router.emit(tag, time, record)
             break
           end
 
           # scenario check
-          execute_idx = scenario_ditector(record)
+          execute_idx = scenario_detector(record)
 
           next if execute_idx.nil?
 
           # execute scenario
           # マッチしたシナリオを実行する（emitする）
-          router.emit('scenario', time, @executes[execute_idx])
+          router.emit('scenario', time, get_scenario(@executes[execute_idx]))
         end
       end
 
@@ -145,7 +145,7 @@ module Fluent
 
       # ruleを調べて、マッチしたらそのindexを返す。
       # すべてマッチしなかったらnilを返す
-      def scenario_ditector(record) # rubocop:disable all
+      def scenario_detector(record) # rubocop:disable all
         @rules.each_with_index do |rule, idx|
           return idx if instance_eval(rule)
         end
@@ -157,6 +157,13 @@ module Fluent
         [separated_str[1], separated_str[3]]
       rescue StandardError
         raise Fluent::ConfigError, 'out_scenario_manager: scenario rule should contain ~ then ~ .'
+      end
+
+      def get_scenario(execute)
+        execute_scenario_label = /(execute_scenario )(.+*)/.match(execute)[2]
+        @scenarios.each_with_index do |scenario, _idx|
+          return scenario if scenario['label'] == execute_scenario_label
+        end
       end
 
       def convert_num(value)
