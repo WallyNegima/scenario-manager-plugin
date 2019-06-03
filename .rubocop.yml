@@ -1,7 +1,7 @@
 Style/AsciiComments:
   Enabled: false
 Metrics/LineLength:
-  Max: 130
+  Max: 140
 Naming/UncommunicativeMethodParamName:
   Enabled: false
 Metrics/AbcSize:
@@ -13,6 +13,6 @@ Metrics/PerceivedComplexity:
 Metrics/CyclomaticComplexity:
   Max: 10
 Metrics/BlockLength:
-  Max: 40
+  Max: 45
 Metrics/ClassLength:
   Max: 120

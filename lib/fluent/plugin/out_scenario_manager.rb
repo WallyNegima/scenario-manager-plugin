@@ -99,11 +99,9 @@ module Fluent
       def start
         super
         @storage.put(:scenario, '') unless @storage.get(:scenario)
-        pp @storage.get(:scenario)
       end
 
       def process(tag, es)
-        pp @storage.get(:scenario)
         es.each do |time, record|
           # output events to ...
           unless @scenario_manage_mode
@@ -139,7 +137,7 @@ module Fluent
           raise(Fluent::ConfigError, 'out_scenario_manager: some weird config is set {' + k.to_s + ':' + v.to_s + '}')
         end
 
-        raise Fluent::ConfigError, 'out_scenario_manager: "if" directive is ruquired' if @if.nil?
+        raise Fluent::ConfigError, 'out_scenario_manager: "if" directive is required' if @if.nil?
         raise Fluent::ConfigError, 'out_scenario_manager: "scenario" define is ruquired at least 1' if @scenarios.size <= 0
       end
 
@@ -150,6 +148,12 @@ module Fluent
           return idx if instance_eval(rule)
         end
         nil
+      end
+
+      def executing_scenario
+        pp @storage.get(:scenario)
+
+        @storage.get(:scenario)
       end
 
       def separate_rule_and_exec(rule)

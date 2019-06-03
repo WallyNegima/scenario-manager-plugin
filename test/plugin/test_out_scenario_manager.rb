@@ -106,6 +106,36 @@ class ScenarioManagerOutputTest < Test::Unit::TestCase
       assert_equal(record['limit'], 30)
       assert_equal(record['action'], 'greet')
     end
+
+    # TODO: storageを使ったてすとを作成すること
+    # test 'storage' do
+    #   conf = config_element('ROOT', 'sensor', {
+    #                           'if' => 'record["face_id"] == 1 then execute_scenario singing',
+    #                           'elsif1' => 'record["face_id"] == 3 and executing_scenario == "singing" then execute_scenario greeting',
+    #                           'tag' => 'scenario'
+    #                         }, [config_element('scenario1', '',
+    #                                            'label' => 'greeting',
+    #                                            'priority' => 2,
+    #                                            'limit' => 30,
+    #                                            'action' => 'greet')])
+    #   d = create_driver(conf)
+    #   # executeing_scenario を singingに
+    #   # d.run(default_tag: 'scenario') do
+    #   #   d.feed('label' => 'singing')
+    #   # end
+
+    #   d.run(default_tag: 'sensor') do
+    #     d.feed('face_id' => 3)
+    #   end
+
+    #   events = d.events
+    #   assert_equal(1, events.size)
+    #   record = events.first[2]
+    #   assert_equal(record['label'], 'greeting')
+    #   assert_equal(record['priority'], 2)
+    #   assert_equal(record['limit'], 30)
+    #   assert_equal(record['action'], 'greet')
+    # end
   end
 
   # Another test group goes here
