@@ -100,8 +100,6 @@ module Fluent
         super
         @storage.put(:scenario, 0) unless @storage.get(:scenario)
         pp @storage.get(:scenario)
-        pp @scenarios
-        pp @rules
       end
 
       def process(tag, es)
@@ -121,7 +119,7 @@ module Fluent
 
           # execute scenario
           # マッチしたシナリオを実行する（emitする）
-          router.emit('scenario', time, record)
+          router.emit('scenario', time, @executes[execute_idx])
         end
       end
 
