@@ -23,9 +23,10 @@ module Fluent
     # fluentd output plugin
     class ScenarioManagerOutput < Fluent::Plugin::Output
       Fluent::Plugin.register_output('scenario_manager', self)
-      helpers :storage, :event_emitter
+      helpers :event_emitter
       DEFAULT_STORAGE_TYPE = 'local'
       PATTERN_MAX_NUM = 20
+      @@executing_scenario = ''
 
       config_param(
         :scenario_manage_mode,
@@ -37,7 +38,7 @@ module Fluent
       config_param(
         :tag,
         :string,
-        default: 'scenario'
+        default: nil
       )
       config_param(
         :if, :string, default: nil, desc: 'first scenario manage rule.'
@@ -62,9 +63,6 @@ module Fluent
 
       def configure(conf)
         super
-        config = conf.elements.select { |e| e.name == 'storage' }.first
-        @storage = storage_create(usage: 'test', conf: config, default_type: DEFAULT_STORAGE_TYPE)
-
         # シナリオパラメーターを取得
         @scenarios = []
         conf.elements.select { |element| element.name.match(/^scenario\d\d?$/) }
@@ -98,15 +96,15 @@ module Fluent
 
       def start
         super
-        @storage.put(:scenario, '') unless @storage.get(:scenario)
       end
 
       def process(tag, es)
         es.each do |time, record|
           # output events to ...
           unless @scenario_manage_mode
-            @storage.put(:scenario, record['label'] || '')
-            router.emit(tag, time, record)
+            @@executing_scenario = record['label']
+            # TODO: actionタグを自由に命名できるようにする
+            router.emit("serialized_action", time, record)
             break
           end
 
@@ -117,7 +115,7 @@ module Fluent
 
           # execute scenario
           # マッチしたシナリオを実行する（emitする）
-          router.emit('scenario', time, get_scenario(@executes[execute_idx]))
+          router.emit(@tag || 'detected_scenario', time, get_scenario(@executes[execute_idx]))
         end
       end
 
@@ -151,9 +149,7 @@ module Fluent
       end
 
       def executing_scenario
-        pp @storage.get(:scenario)
-
-        @storage.get(:scenario)
+        @@executing_scenario
       end
 
       def separate_rule_and_exec(rule)
@@ -168,6 +164,7 @@ module Fluent
         @scenarios.each_with_index do |scenario, _idx|
           return scenario if scenario['label'] == execute_scenario_label
         end
+        return nil
       end
 
       def convert_num(value)
