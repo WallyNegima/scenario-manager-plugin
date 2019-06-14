@@ -69,7 +69,7 @@ module Fluent
             .each do |param|
           scenario = {}
           param.each_pair do |key, value|
-            scenario.merge!(key => value)
+            scenario.merge!(key => convert_value(value))
           end
           @scenarios.push(scenario)
         end
@@ -167,7 +167,7 @@ module Fluent
         return nil
       end
 
-      def convert_num(value)
+      def convert_value(value)
         # Booleanがチェック
         return true if value == 'true'
 
