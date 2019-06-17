@@ -175,6 +175,7 @@ module Fluent
 
         # 数値データなら数値で返す
         return value.to_i if value.to_i.to_s == value.to_s
+        return value.to_f if value.to_f.to_s == value.to_s
 
         value
       end
