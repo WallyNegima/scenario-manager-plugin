@@ -69,7 +69,7 @@ module Fluent
             .each do |param|
           scenario = {}
           param.each_pair do |key, value|
-            scenario.merge!(key => value)
+            scenario.merge!(key => convert_value(value))
           end
           @scenarios.push(scenario)
         end
@@ -115,7 +115,7 @@ module Fluent
 
           # execute scenario
           # マッチしたシナリオを実行する（emitする）
-          router.emit(@tag || 'detected_scenario', time, get_scenario(@executes[execute_idx]))
+          router.emit(@tag || 'detected_scenario', time, generate_record_for_emit(get_scenario(@executes[execute_idx]), record))
         end
       end
 
@@ -167,7 +167,7 @@ module Fluent
         return nil
       end
 
-      def convert_num(value)
+      def convert_value(value)
         # Booleanがチェック
         return true if value == 'true'
 
@@ -175,8 +175,14 @@ module Fluent
 
         # 数値データなら数値で返す
         return value.to_i if value.to_i.to_s == value.to_s
+        return value.to_f if value.to_f.to_s == value.to_s
 
         value
+      end
+
+      # value は上記のconvert_Valueを使用している前提.
+      def generate_record_for_emit(value, record)
+        return value.map{ |k, v| [k,  v.is_a?(String) && v.start_with?('${') && v.end_with?('}') ? instance_eval(v[2..-2]) : v] }.to_h
       end
     end
   end
