@@ -25,7 +25,7 @@ module Fluent
       Fluent::Plugin.register_output('scenario_manager', self)
       helpers :event_emitter
       DEFAULT_STORAGE_TYPE = 'local'
-      PATTERN_MAX_NUM = 20
+      PATTERN_MAX_NUM = 40
       @@executing_scenario = ''
 
       config_param(

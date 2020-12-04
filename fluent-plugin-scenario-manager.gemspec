@@ -5,7 +5,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name    = 'fluent-plugin-scenario-manager'
-  spec.version = '0.1.0'
+  spec.version = '0.1.1'
   spec.authors = ['shintaro nagama']
   spec.email   = ['u.str.gm@gmail.com']
 
